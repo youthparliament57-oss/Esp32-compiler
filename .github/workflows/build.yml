@@ -1,0 +1,39 @@
+name: Build ESP32-C3 Super Mini Firmware
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+name: Checkout repository
+      uses: actions/checkout@v4
+
+name: Setup Arduino CLI
+      uses: arduino/setup-arduino-cli@v1
+
+name: Install ESP32 Core
+      run: |
+        arduino-cli config init
+        arduino-cli core update-index
+        arduino-cli core install esp32:esp32
+
+name: Compile firmware
+      run: |
+        arduino-cli compile \
+          --fqbn esp32:esp32:esp32c3 \
+          --output-dir build \
+          .
+
+name: Rename firmware
+      run: |
+        cp build/*.ino.bin build/firmware.bin || true
+
+name: Upload BIN files
+      uses: actions/upload-artifact@v4
+      with:
+        name: esp32c3-build
+        path: build/
